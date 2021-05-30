@@ -44,7 +44,6 @@ class App extends Component {
 
   getPersonDetails(actorId) {
 
-    //const discoverUrl = "https://api.themoviedb.org/3/discover/movie?api_key=" + API_KEY + "&with_cast=" + actorId
     const discoverUrl = "http://api.themoviedb.org/3/person/" + actorId + "/movie_credits?api_key=" + API_KEY
 
     $.ajax({
@@ -73,19 +72,6 @@ class App extends Component {
   }
 
   testFunc(movId) {
-    /*const testUrl = "https://api.themoviedb.org/3/movie/" + movId + "?api_key=" + API_KEY
-    
-    $.ajax({
-
-      url: testUrl,
-      success: (res) => {
-
-        console.log("in testFunc")
-        const imdbId = res.imdb_id
-        console.log(imdbId)
-      }
-
-    })*/
     const testUrl = "https://api.themoviedb.org/3/movie/" + movId + "/images?api_key=" + API_KEY
     
     $.ajax({
@@ -101,49 +87,99 @@ class App extends Component {
   }
 
   searchBox(searchVal) {
+
+    if (this.state.selectedRadio === true) {
+
+      console.log("keyword search..")
+      const keywordUrl = "https://api.themoviedb.org/3/search/keyword?api_key=" + API_KEY + "&query=" + searchVal + "&page=1"
+
+      $.ajax({
+
+        url: keywordUrl,
+        success: (searchResults) => {
+
+          const allKeywords = searchResults.results
+          var relatedMovies = []
+
+          allKeywords.forEach(keyw => {
+            var keyword_id = keyw.id
+            console.log(keyw.name + " " + keyword_id)
+
+            this.searchByKeyword(relatedMovies, keyword_id)
+          })
+          this.setState({selectedRadio: false})
+        }
+      })
+    }
+
+    else {
+      const searchUrl = "https://api.themoviedb.org/3/search/multi?api_key=" + API_KEY + "&query=" + searchVal
+
+      $.ajax({
+
+        url: searchUrl,
+        success: (searchResults) => {
+
+          console.log("search successful")
+          const data = searchResults.results
+          var kf = data[0].known_for
+
+          if (kf != null){
+
+            var personId = data[0].id   // if search = person, get movies
+          
+            this.getPersonDetails(personId)
+          }
+          else {
+            
+            var movieList = []
+
+            data.forEach(movie => {
+
+              if (movie.media_type === "movie") {
+                movie.poster_path = IMG_API + movie.poster_path
+                const movieEntry = <MovieResults key={movie.id} movie = {movie}/>
+                movieList.push(movieEntry)              
+              }
+
+            });
+
+            this.setState({movies: movieList})
+            this.setState({
+              selectedRadio: false
+            })
+          }
+        
+        }
+
+      })    
+    }
     
-    const searchUrl = "https://api.themoviedb.org/3/search/multi?api_key=" + API_KEY + "&query=" + searchVal
+  }
+
+  searchByKeyword(movie_list, keyw_id) {
+    
+    const keywordSearchUrl = "https://api.themoviedb.org/3/keyword/" + keyw_id + "/movies?api_key=" + API_KEY
 
     $.ajax({
 
-      url: searchUrl,
-      success: (searchResults) => {
+      url: keywordSearchUrl,
+      success: (res) => {
 
-        console.log("search successful")
-        const data = searchResults.results
-        var kf = data[0].known_for
+        const all_movies = res.results
 
-        if (kf != null){
-
-          var personId = data[0].id   // if search = person, get movies
+        all_movies.forEach(movie => {
+          movie.poster_path = IMG_API + movie.poster_path
+          const movieEntry = <MovieResults key={movie.id} movie = {movie}/>
+          movie_list.push(movieEntry) 
+        })
         
-          this.getPersonDetails(personId)
-        }
-        else {
-          
-          var movieList = []
-
-          data.forEach(movie => {
-
-            if (movie.media_type === "movie") {
-              movie.poster_path = IMG_API + movie.poster_path
-              const movieEntry = <MovieResults key={movie.id} movie = {movie}/>
-              movieList.push(movieEntry)              
-            }
-
-          });
-
-          this.setState({movies: movieList})
-          this.setState({
-            selectedRadio: false
-          })
-        }
-      
+        //console.log(movie_list)
+        this.setState({movies: movie_list})
       }
+  })
 
-    })
   }
-
 
   handleKeyPress = (e) => {
     if (e.key === 'Enter') {
@@ -167,7 +203,7 @@ class App extends Component {
     //console.log(event.target.value);
     console.log("Search by keyword")
     this.setState({
-      selectedRadio: !this.state.selectedRadio
+      selectedRadio: true
     })
   }
 
