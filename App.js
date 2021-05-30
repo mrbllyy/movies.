@@ -72,6 +72,7 @@ class App extends Component {
   }
 
   testFunc(movId) {
+    
     const testUrl = "https://api.themoviedb.org/3/movie/" + movId + "/images?api_key=" + API_KEY
     
     $.ajax({
@@ -168,13 +169,14 @@ class App extends Component {
 
         const all_movies = res.results
 
-        all_movies.forEach(movie => {
-          movie.poster_path = IMG_API + movie.poster_path
-          const movieEntry = <MovieResults key={movie.id} movie = {movie}/>
-          movie_list.push(movieEntry) 
+        all_movies.forEach(movs => {
+          movs.poster_path = IMG_API + movs.poster_path
+          const movieEntry = <MovieResults key={movs.id} movie = {movs}/>
+          if (movie_list.findIndex(item => item.value === movs.id) < 0) {
+            movie_list.push(movieEntry)
+          }
         })
         
-        //console.log(movie_list)
         this.setState({movies: movie_list})
       }
   })
@@ -189,6 +191,7 @@ class App extends Component {
   }
 
   goHomePage = () => {
+    this.setState({movies: []})
     this.trending()
     this.setState({
       selectedRadio: false
@@ -213,6 +216,7 @@ class App extends Component {
         <header className="App-header">
 
           <button className="title" onClick={this.goHomePage}>movie.</button>
+
           <div className="buttons">
             <button className="login" type="submit" onClick={this.handleClick}>Login</button>
             <button className="signup" type="submit">Sign Up</button>
