@@ -31,7 +31,11 @@ class App extends Component {
 
         data.forEach(movie => {
 
-          movie.poster_path = IMG_API + movie.poster_path
+          if (movie.poster_path == null) {
+            movie.poster_path = "https://storage.googleapis.com/movie-90619.appspot.com/klaket.png"
+          } else {
+            movie.poster_path = IMG_API + movie.poster_path
+          }
           const movieEntry = <MovieResults key={movie.id} movie = {movie}/>
           movieList.push(movieEntry)
         });
@@ -57,7 +61,11 @@ class App extends Component {
 
         personData.forEach(mov => {
 
-          mov.poster_path = IMG_API + mov.poster_path
+          if (mov.poster_path == null) {
+            mov.poster_path = "https://storage.googleapis.com/movie-90619.appspot.com/klaket.png"
+          } else {
+            mov.poster_path = IMG_API + mov.poster_path
+          }
           const movieEntry = <MovieResults key={mov.id} movie = {mov}/>
           allMovies.push(movieEntry)
         });
@@ -111,19 +119,23 @@ class App extends Component {
           if (kf != null){
 
             var personId = data[0].id   // if search = person, get movies
-          
+
             this.getPersonDetails(personId)
           }
           else {
-            
+
             var movieList = []
 
             data.forEach(movie => {
 
               if (movie.media_type === "movie") {
-                movie.poster_path = IMG_API + movie.poster_path
+                if (movie.poster_path == null) {
+                  movie.poster_path = "https://storage.googleapis.com/movie-90619.appspot.com/klaket.png"
+                } else {
+                  movie.poster_path = IMG_API + movie.poster_path
+                }
                 const movieEntry = <MovieResults key={movie.id} movie = {movie}/>
-                movieList.push(movieEntry)              
+                movieList.push(movieEntry)
               }
 
             });
@@ -134,13 +146,13 @@ class App extends Component {
             })
           }
         }
-      })    
+      })
     }
-    
+
   }
 
   searchByKeyword(movie_list, keyw_id) {
-    
+
     const keywordSearchUrl = "https://api.themoviedb.org/3/keyword/" + keyw_id + "/movies?api_key=" + API_KEY
 
     $.ajax({
@@ -151,13 +163,17 @@ class App extends Component {
         const all_movies = res.results
 
         all_movies.forEach(movs => {
-          movs.poster_path = IMG_API + movs.poster_path
+          if (movs.poster_path == null) {
+            movs.poster_path = "https://storage.googleapis.com/movie-90619.appspot.com/klaket.png"
+          } else {
+            movs.poster_path = IMG_API + movs.poster_path
+          }
           const movieEntry = <MovieResults key={movs.id} movie = {movs}/>
           if (movie_list.findIndex(item => item.value === movs.id) < 0) {
             movie_list.push(movieEntry)
           }
         })
-        
+
         this.setState({movies: movie_list})
       }
   })
@@ -202,10 +218,10 @@ class App extends Component {
             <button className="login" type="submit" onClick={this.handleClick}>Login</button>
             <button className="signup" type="submit">Sign Up</button>
           </div>
-          
-          
+
+
         </header>
-        
+
         <input className="Input-box" style={{
           width: "70%",
           fontSize: 18,
@@ -217,11 +233,11 @@ class App extends Component {
         <div className="keyword-button">
           <input type="radio" value="Keyword" name="keyword" onChange={this.onChangeValue} checked={this.state.selectedRadio}/> Keyword
         </div>
-        
+
 
         <div className="content">
           {this.state.movies}
-        </div>  
+        </div>
 
         <div className="pageButtons">
           <button className="prev" type="submit">Prev</button>
